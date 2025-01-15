@@ -24,6 +24,9 @@ public class UserService {
 
     public void insert(UserDTO userDTO) {
         userDTO.setPassword(encoder.encode(userDTO.getPassword()));
+    }
 
+    public UserDTO selectByEmail(String email) {
+        return sqlSession.selectOne(NAMESPACE + ".selectByEmail", email);
     }
 }

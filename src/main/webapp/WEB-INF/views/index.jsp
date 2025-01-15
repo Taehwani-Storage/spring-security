@@ -14,5 +14,6 @@
 
     <input type="submit" value="로그인">
 </form>
+<a href="/user/oAuth2/kakao">카카오 로그인</a>
 </body>
 </html>

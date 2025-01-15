@@ -1,8 +1,11 @@
 package com.bit.security.config;
 
+import com.bit.security.service.OAuthService;
 import com.bit.security.service.UserDetailsServiceImpl;
 import com.bit.security.service.UserService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -11,7 +14,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 // 이 클래스는 설정 클래스로 Spring 시작되면 자동 호출
 @Configuration
@@ -20,12 +22,12 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 // 메소드마다 접근 가능 여부를 Security 통해 처리
 @EnableMethodSecurity
 public class SecurityConfig {
+    @Autowired
+    private OAuthService oAuthService;
+
+
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity security, UserService userService, UserDetailsServiceImpl userDetailsServiceImpl) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity security, ApplicationContext applicationContext, UserService userService, UserDetailsServiceImpl userDetailsServiceImpl) throws Exception {
         security
                 // cors: Cross Origin Resource Sharing
                 // 브라우저에서 보낸 요청과 돌아온 응답의 프로토콜, 도메인, 포트번호가 동일할 때에만 정상 동작하고 아니면 에러
@@ -33,6 +35,9 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> // 접근 권한 설정
                                 request
+                                        // 소셜 로그인 페이지는 누구나 다 접근 가능
+                                        .requestMatchers("/user/oAuth2/kakao").permitAll()
+
                                         // JSP 뷰 폴더는 누구나 다 접근 가능
                                         .requestMatchers("/WEB-INF/views/**").permitAll()
                                         // 최상위 인덱스 페이지는 누구나 다 접근 가능
@@ -110,6 +115,12 @@ public class SecurityConfig {
                                 }
                         )
                 );
+        security.oauth2Login(oauth -> oauth
+                .loginProcessingUrl("/user/oAuth2/kakao")
+                .defaultSuccessUrl("/board/upload")
+                .userInfoEndpoint(userInfo -> userInfo
+                        .userService(oAuthService)));
+
         return security.build();
     }
 

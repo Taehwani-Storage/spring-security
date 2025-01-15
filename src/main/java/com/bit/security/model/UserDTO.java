@@ -18,6 +18,7 @@ public class UserDTO implements UserDetails {
     private String password;
     private String nickname;
     private String role;
+    private String email;
     private Collection<GrantedAuthority> authorities;
 
     @Override

@@ -7,6 +7,11 @@
         SELECT * FROM user
         WHERE username=#{username}
     </select>
+    <select id="selectByEmail" parameterType="string" resultType="userDTO">
+        SELECT * FROM user
+        WHERE email=#{email}
+    </select>
+
     <!-- 아이디 중복 검사하는 xml -->
     <select id="validateUsername" parameterType="string" resultType="userDTO">
         SELECT * FROM user
